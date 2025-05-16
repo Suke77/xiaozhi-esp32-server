@@ -47,14 +47,17 @@ public class AdminController {
     @Operation(summary = "分页查找用户")
     @RequiresPermissions("sys:role:superAdmin")
     @Parameters({
-            @Parameter(name = "mobile", description = "用户手机号码", required = false),
+            @Parameter(name = "mobile", description = "用户手机号码（支持模糊匹配）", required = false),
             @Parameter(name = Constant.PAGE, description = "当前页码，从1开始", required = true),
             @Parameter(name = Constant.LIMIT, description = "每页显示记录数", required = true),
     })
     public Result<PageData<AdminPageUserVO>> pageUser(
             @Parameter(hidden = true) @RequestParam Map<String, Object> params) {
         AdminPageUserDTO dto = new AdminPageUserDTO();
-        dto.setMobile((String) params.get("mobile"));
+        String mobile = (String) params.get("mobile");
+        if (mobile != null) {
+            dto.setMobile("%" + mobile + "%"); // 添加通配符实现模糊匹配
+        }
         dto.setLimit((String) params.get(Constant.LIMIT));
         dto.setPage((String) params.get(Constant.PAGE));
         ValidatorUtils.validateEntity(dto);
